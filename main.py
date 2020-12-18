@@ -21,6 +21,8 @@ blue = (0, 0, 255)
 green = (0, 255, 0)
 red = (255, 0, 0)
 
+inventoryOpen = False
+
 fps = 60
 fpsClock = pygame.time.Clock()
 
@@ -29,7 +31,10 @@ screen = pygame.display.set_mode((width, height))
 buffer = pygame.Surface((width, height))
 buffer1 = pygame.Surface((222, 24))
 buffer2 = pygame.Surface((222, 48))
+buffer3 = pygame.Surface((width, height))
 
+
+mainBuffer = pygame.Surface((width, height))
 
 
 files.loadTextures("textures.txt", "itextures.txt")
@@ -37,6 +42,8 @@ files.loadTextures("textures.txt", "itextures.txt")
 gui.setGfxSurface(buffer)
 gui.setToolSurface(buffer1)
 gui.setHbSurface(buffer2)
+gui.setInvSurface(buffer3)
+
 
 
 files.openInventory("inventory.txt", "quantity.txt")
@@ -48,7 +55,9 @@ files.prepareWorld("world.txt")
 while True:
 
 
+    keys1 = keys
     keys = pygame.key.get_pressed()  #checking pressed keys
+    
     mouse = pygame.mouse.get_pressed()
 
     dx = 0
@@ -85,7 +94,10 @@ while True:
     #if keys[pygame.K_d]:
         
     if keys[pygame.K_e]:
-      logic.changeSlot(1)
+      inventoryOpen = True
+    else:
+      if (keys1[pygame.K_e] != keys[pygame.K_e]):
+        inventoryOpen = False
         
     #if keys[pygame.K_q]:
         
@@ -100,11 +112,16 @@ while True:
     dy = dy + logic.applyGravity()
     logic.movePlayer(dx, dy)
     # Draw.
-    screen.blit(buffer, (0, 0))
-    screen.blit(buffer1, (0, 0))
-    screen.blit(buffer2, (223, 0))
+    
+    if (inventoryOpen):
+      mainBuffer.blit(buffer3, (0, 0))
+    else:
+      mainBuffer.blit(buffer, (0, 0))
+      mainBuffer.blit(buffer1, (0, 0))
+      mainBuffer.blit(buffer2, (223, 0))
 
 
+    screen.blit(mainBuffer, (0, 0))
     pygame.display.flip()
     fpsClock.tick(fps)
 

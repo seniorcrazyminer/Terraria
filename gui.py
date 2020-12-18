@@ -6,6 +6,7 @@ from pygame import gfxdraw
 gfxSurface = 0
 toolSurface = 0
 hbSurface = 0
+invSurface = 0
 scrn = [0, 0, 32, 24, 10]
 
 scale = 5
@@ -29,6 +30,10 @@ def setGfxSurface(surf):
 def setToolSurface(surf):
   global toolSurface
   toolSurface = surf
+
+def setInvSurface(surf):
+  global invSurface
+  invSurface = surf
 
 def setHbSurface(surf):
   global hbSurface
@@ -145,7 +150,12 @@ def checkAllAir():
     renderXLineChecked(a, scrn[0] + a)
 
 def drawInventory():
-  return 0
+  global invSurface
+  invSurface.fill((255, 255, 255))
+  for a in range(6):
+    for b in range(5):
+      gfxdraw.rectangle(toolSurface, (22 * a, 22*b, 24, 24), (0, 0, 0))
+      drawTool(22*a + 1, 22*b + 1, files.getInventoryItem(5*a + b))
 
 def drawToolBar(slot):
   global toolSurface
