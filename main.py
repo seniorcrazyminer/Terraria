@@ -40,7 +40,7 @@ gui.setHbSurface(buffer2)
 
 
 files.openInventory("inventory.txt", "quantity.txt")
-logic.generateWorld(100, 100, "world.txt")
+logic.generateWorld(500, 500, "world.txt")
 files.prepareWorld("world.txt")
 
 
@@ -79,7 +79,8 @@ while True:
     if keys[pygame.K_r]:
       logic.respawn()
         
-    #if keys[pygame.K_a]:
+    if keys[pygame.K_c]:
+      gui.checkAllAir()
         
     #if keys[pygame.K_d]:
         

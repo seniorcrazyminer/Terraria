@@ -115,6 +115,12 @@ def renderXLine(x, wx):
   for b in range(0, scrn[3]-scrn[1]):
     drawBlock(x, b, wx, scrn[1] + b)
 
+def renderXLineChecked(x, wx):
+  global scrn
+  for b in range(0, scrn[3]-scrn[1]):
+    if (files.getBlock(wx, scrn[1] + b) == 0):
+      drawBlock(x, b, wx, scrn[1] + b)
+
 def renderYLine(y, wy):
   global scrn
   for a in range(0, scrn[2]-scrn[0]):
@@ -133,6 +139,10 @@ def clearYLine(y):
 def drawFullScreen():
   for a in range(0, scrn[2]-scrn[0]):
     renderXLine(a, scrn[0] + a)
+
+def checkAllAir():
+  for a in range(0, scrn[2]-scrn[0]):
+    renderXLineChecked(a, scrn[0] + a)
 
 def drawInventory():
   return 0

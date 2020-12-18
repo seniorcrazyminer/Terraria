@@ -139,7 +139,6 @@ def applyGravity():
       fallPathActive = True
     if (fallPathActive):
       dy = 1
-      print(abs(player[1] - fallPath[1]))
   else:
     if (fallPathActive):
       fallPathActive = False
