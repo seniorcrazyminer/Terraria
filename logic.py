@@ -4,7 +4,7 @@ import random
 
 import math
 
-player = [0, 0, 0, 0, 0, 20]
+player = [0, 0, 0, 20]
 wrld = [0, 0, 0, 0]
 scrn = [0, 0, 0, 0, 0]
 
@@ -19,6 +19,7 @@ def updateVars():
   scrn = gui.screen()
 
 def generateWorld(w, h, fileName):
+  files.setDim(w, h)
   gnd = 50
   desert = [50, 100]
   for a in range(w):
@@ -40,6 +41,11 @@ def generateWorld(w, h, fileName):
         blk = 2
         files.setBlock(a, b, blk)
     gnd = gnd + random.randint(-1, 1)
+  spwnx = random.randint(10, 50)
+  spwny = 0
+  while (files.getBlockType(files.getBlock(spwnx, spwny)) != 2):
+    spwny = spwny + 1
+  files.setSpawn(spwnx, spwny)
   files.saveWorld(fileName)
 
 def addToInventory(item, qt):
@@ -70,7 +76,7 @@ def movePlayer(dx, dy):
   updateVars()
   [xmin, ymin, xmax, ymax, p] = scrn
   [minx, miny, maxx, maxy] = wrld
-  gui.drawBlockBehind(x - player[2], y - player[3], x, y)
+  gui.drawBlockBehind(x - scrn[0], y - scrn[1], x, y)
   if (dx < 0):
     if (x > xmin and not checkBlock(x, y, dx, 0)):
       if (x < maxx - p and x > minx + p and xmin > minx):
@@ -82,7 +88,7 @@ def movePlayer(dx, dy):
         sx = dx
       x = x + dx
   if (dy < 0):
-    if (y > ymin and not checkBlock(x, y, 0, dy)):
+    if (y > ymin and not checkBlock(x, y, 0, dy) and checkBlock(x, y, 0, 1)):
       if (y < maxy - p and y > miny + p and ymin > miny):
         sy = dy
       y = y + dy
@@ -98,17 +104,25 @@ def movePlayer(dx, dy):
   updateVars()
   player[0] = x
   player[1] = y
-  gui.drawPlayer(x - player[2], y - player[3])
+  gui.drawPlayer(x - scrn[0], y - scrn[1])
+
+def setPlayerPos(x, y):
+  global player
+  global scrn
+  gui.drawBlockBehind(x - scrn[0], y - scrn[1], x, y)
+  player[0] = x
+  player[1] = y
+  gui.drawPlayer(x - scrn[0], y - scrn[1])
 
 
 def changeHealth(dh):
   global player
-  player[5] = player[5] + dh
+  player[3] = player[3] + dh
   gui.drawHealthBar()
 
 def getHealth():
   global player
-  return player[5]
+  return player[3]
 
 def applyGravity():
   global player
@@ -117,11 +131,11 @@ def applyGravity():
   onG = onGround(x, y)
   if (not onG):
     movePlayer(0, 1)
-    player[4] = player[4] + 1
+    player[2] = player[2] + 1
   else:
-    if (player[4] > 8):
-      changeHealth(-(player[4] - 8))
-    player[4] = 0
+    if (player[2] > 8):
+      changeHealth(-(player[2] - 8))
+    player[2] = 0
 
 def onGround(x, y):
   updateVars()
@@ -251,6 +265,6 @@ def attemptMoveRight(a, b):
 #do this when I want to respawn
 def respawn():
   global player
-  player = [0, 0, 0, 0]
+  player = [0, 0, 0, 0, 0, 20]
   gui.respawn()
   

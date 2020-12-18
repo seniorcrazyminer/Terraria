@@ -40,11 +40,8 @@ gui.setHbSurface(buffer2)
 
 
 files.openInventory("inventory.txt", "quantity.txt")
-files.openWorld("world.txt")
-
-
-gui.drawFullScreen()
-gui.drawToolBar(0)
+logic.generateWorld(100, 100, "world.txt")
+files.prepareWorld("world.txt")
 
 
 # Game loop.
@@ -70,7 +67,7 @@ while True:
       #plyr.move(0, 1)
     
     if keys[pygame.K_UP]:
-      logic.movePlayer(0, -1)
+      logic.movePlayer(0, -2)
       #plyr.move(0, -1)
     
     if keys[pygame.K_q]:

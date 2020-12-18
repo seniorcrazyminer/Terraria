@@ -1,5 +1,8 @@
+import logic
+import gui
 
-dim = []
+dim = [0, 0]
+spawn = [0, 0]
 textures = []
 iTextures = []
 tempWorld = []
@@ -21,6 +24,16 @@ def quantity():
 def split(word): 
     return [char for char in word]
 
+def setSpawn(x, y):
+  global spawn
+  spawn = [x, y]
+
+def setDim(x, y):
+  global dim
+  global tempWorld
+  dim = [x, y]
+  if (len(tempWorld) != dim[0]*dim[1]):
+    tempWorld = [0] * (dim[0]*dim[1])
 
 def loadTextures(fileName, fileName1):
   global textures
@@ -75,13 +88,15 @@ def openInventory(fileName, fileNameq):
 
 def openWorld(fileName):
   global dim
+  global spawn
   global tempWorld
   wd = open(fileName, "r")
   lines = wd.read()
   data = lines.split(",")
   dim = [int(data[0]), int(data[1])]
-  if (len(split(data[2])) == dim[0]*dim[1]):
-    tempWorld = split(data[2])
+  spawn = [int(data[2]), int(data[3])]
+  if (len(split(data[4])) == dim[0]*dim[1]):
+    tempWorld = split(data[4])
   else:
     tempWorld = [0] * (dim[0]*dim[1])
   wd.close()
@@ -89,12 +104,17 @@ def openWorld(fileName):
 def saveWorld(fileName):
   global tempWorld
   global dim
+  global spawn
   print("saving...")
   with open(fileName, "w") as wd:
     wd.seek(0, 0)
     wd.write(str(dim[0]))
     wd.write(",")
     wd.write(str(dim[1]))
+    wd.write(",")
+    wd.write(str(spawn[0]))
+    wd.write(",")
+    wd.write(str(spawn[1]))
     wd.write(",")
     for block in tempWorld:
         wd.write(block)
@@ -142,3 +162,22 @@ def setInventoryItem(numSlot, itm, q):
   global inv
   inv[numSlot] = itm
   qty[numSlot] = q
+
+def prepareWorld(fileName):
+  global spawn
+  openWorld(fileName) 
+  print(spawn)
+  logic.setPlayerPos(spawn[0], spawn[1])
+  gui.setScreen(spawn[0] - 10, spawn[1] - 10, spawn[0] + 22, spawn[1] + 14, 10)
+  gui.drawFullScreen()
+  gui.drawToolBar(0)
+  gui.drawHealthBar()
+
+def rePrepareWorld():
+  global spawn
+  print(spawn)
+  logic.setPlayerPos(spawn[0], spawn[1])
+  gui.setScreen(spawn[0] - 10, spawn[1] - 10, spawn[0] + 22, spawn[1] + 14, 10)
+  gui.drawFullScreen()
+  gui.drawToolBar(0)
+  gui.drawHealthBar()

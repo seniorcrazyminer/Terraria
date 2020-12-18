@@ -18,6 +18,10 @@ def screen():
   global scrn
   return scrn
 
+def setScreen(xmin, ymin, xmax, ymax, padding):
+  global scrn
+  scrn = [xmin, ymin, xmax, ymax, padding]
+
 def setGfxSurface(surf):
   global gfxSurface
   gfxSurface = surf
@@ -150,12 +154,10 @@ def drawHealthBar():
   for a in range(10):
     for b in range(2):
       if ((10*b) + a <= health):
-        filledRectangle(hbSurface, 22*a + 1, 22*b + 1, 22, 22, (255, 0, 0))
+        filledRect(hbSurface, 22*a + 1, 22*b + 1, 20, 20, (255, 0, 0))
 
 
 
 #do this when I want to respawn
 def respawn():
-  global scrn
-  scrn = [0, 0, 32, 24, 10]
-  drawFullScreen()
+  files.rePrepareWorld()
