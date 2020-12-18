@@ -175,6 +175,10 @@ def mouseClick(x, y):
   gui.fillRect(4*scale*x, 4*scale*y, 4*scale, 4*scale, (255, 0, 0))
   useTool(x, y)
 
+def mouseClickInventory(x, y):
+  x = math.floor(x / 24)
+  y = math.floor(y / 24)
+  print(x, y)
 
 def useTool(tx, ty):
   global currentSlot

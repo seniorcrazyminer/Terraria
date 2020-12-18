@@ -15,7 +15,7 @@ from pygame import mouse
 
 pygame.init()
 
-keys = []
+keys = pygame.key.get_pressed()
 
 blue = (0, 0, 255)
 green = (0, 255, 0)
@@ -55,7 +55,6 @@ files.prepareWorld("world.txt")
 while True:
 
 
-    keys1 = keys
     keys = pygame.key.get_pressed()  #checking pressed keys
     
     mouse = pygame.mouse.get_pressed()
@@ -65,7 +64,10 @@ while True:
 
     if mouse[0]:
       pos = pygame.mouse.get_pos()
-      logic.mouseClick(pos[0], pos[1])
+      if inventoryOpen:
+        logic.mouseClickInventory(pos[0], pos[1])
+      else:
+        logic.mouseClick(pos[0], pos[1])
     
     if keys[pygame.K_RIGHT]:
       dx = dx + 1
@@ -95,9 +97,10 @@ while True:
         
     if keys[pygame.K_e]:
       inventoryOpen = True
-    else:
-      if (keys1[pygame.K_e] != keys[pygame.K_e]):
-        inventoryOpen = False
+      gui.drawInventory()
+    
+    if keys[pygame.K_t]:
+      inventoryOpen = False
         
     #if keys[pygame.K_q]:
         

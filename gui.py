@@ -154,8 +154,7 @@ def drawInventory():
   invSurface.fill((255, 255, 255))
   for a in range(6):
     for b in range(5):
-      gfxdraw.rectangle(toolSurface, (22 * a, 22*b, 24, 24), (0, 0, 0))
-      drawTool(22*a + 1, 22*b + 1, files.getInventoryItem(5*a + b))
+      gfxdraw.rectangle(invSurface, (22 * a, 22*b, 24, 24), (0, 0, 0))
 
 def drawToolBar(slot):
   global toolSurface
