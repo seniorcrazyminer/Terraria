@@ -4,7 +4,7 @@ import random
 
 import math
 
-player = [0, 0, 0, 0]
+player = [0, 0, 0, 0, 0, 20]
 wrld = [0, 0, 0, 0]
 scrn = [0, 0, 0, 0, 0]
 
@@ -102,10 +102,13 @@ def movePlayer(dx, dy):
 
 
 def changeHealth(dh):
-  return 0
+  global player
+  player[5] = player[5] + dh
+  gui.drawHealthBar()
 
-def checkHealth():
-  return 0
+def getHealth():
+  global player
+  return player[5]
 
 def applyGravity():
   global player
@@ -114,6 +117,11 @@ def applyGravity():
   onG = onGround(x, y)
   if (not onG):
     movePlayer(0, 1)
+    player[4] = player[4] + 1
+  else:
+    if (player[4] > 8):
+      changeHealth(-(player[4] - 8))
+    player[4] = 0
 
 def onGround(x, y):
   updateVars()
@@ -237,3 +245,12 @@ def attemptMoveRight(a, b):
           if (b > scrn[1] and b < scrn[3]):
             gui.drawBlock(a - scrn[0], b - scrn[1], a, b)
             gui.drawBlock(a - scrn[0]+1, b - scrn[1], a+1, b)
+
+
+
+#do this when I want to respawn
+def respawn():
+  global player
+  player = [0, 0, 0, 0]
+  gui.respawn()
+  

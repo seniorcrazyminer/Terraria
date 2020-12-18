@@ -27,20 +27,21 @@ fpsClock = pygame.time.Clock()
 width, height = 640, 480
 screen = pygame.display.set_mode((width, height))
 buffer = pygame.Surface((width, height))
-buffer1 = pygame.Surface((width, height))
+buffer1 = pygame.Surface((222, 24))
+buffer2 = pygame.Surface((222, 48))
+
 
 
 files.loadTextures("textures.txt", "itextures.txt")
-files.openWorld("world.txt")
 
 gui.setGfxSurface(buffer)
-gui.setGfxSurface1(buffer1)
+gui.setToolSurface(buffer1)
+gui.setHbSurface(buffer2)
 
-dim = files.world()
-w, h = dim[2], dim[3]
-logic.generateWorld(w, h, "world.txt")
 
 files.openInventory("inventory.txt", "quantity.txt")
+files.openWorld("world.txt")
+
 
 gui.drawFullScreen()
 gui.drawToolBar(0)
@@ -69,12 +70,14 @@ while True:
       #plyr.move(0, 1)
     
     if keys[pygame.K_UP]:
-      logic.movePlayer(0, -2)
+      logic.movePlayer(0, -1)
       #plyr.move(0, -1)
     
-    #if keys[pygame.K_w]:
+    if keys[pygame.K_q]:
+      files.saveWorld("world.txt")
         
-    #if keys[pygame.K_s]:
+    if keys[pygame.K_r]:
+      logic.respawn()
         
     #if keys[pygame.K_a]:
         
@@ -96,8 +99,10 @@ while True:
     logic.applyGravity()
     # Draw.
     screen.blit(buffer, (0, 0))
-    screen.blit(buffer1, (0, 0), (0, 0, 222, 24))
+    screen.blit(buffer1, (0, 0))
+    screen.blit(buffer2, (223, 0))
 
 
     pygame.display.flip()
     fpsClock.tick(fps)
+

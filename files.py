@@ -89,6 +89,7 @@ def openWorld(fileName):
 def saveWorld(fileName):
   global tempWorld
   global dim
+  print("saving...")
   with open(fileName, "w") as wd:
     wd.seek(0, 0)
     wd.write(str(dim[0]))
@@ -96,7 +97,7 @@ def saveWorld(fileName):
     wd.write(str(dim[1]))
     wd.write(",")
     for block in tempWorld:
-        wd.write(str(block))
+        wd.write(block)
   wd.close()
 
 def getBlock(x, y):

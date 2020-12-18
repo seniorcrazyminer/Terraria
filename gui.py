@@ -1,9 +1,11 @@
 import files
+import logic
 
 from pygame import gfxdraw
 
 gfxSurface = 0
-gfxSurface1 = 0
+toolSurface = 0
+hbSurface = 0
 scrn = [0, 0, 32, 24, 10]
 
 scale = 5
@@ -20,10 +22,14 @@ def setGfxSurface(surf):
   global gfxSurface
   gfxSurface = surf
 
-def setGfxSurface1(surf):
-  global gfxSurface1
-  gfxSurface1 = surf
+def setToolSurface(surf):
+  global toolSurface
+  toolSurface = surf
 
+def setHbSurface(surf):
+  global hbSurface
+  hbSurface = surf
+  hbSurface.set_colorkey((255,255,255))
 
 def drawPlayer(x, y):
   drawSprite(x, y, playerSprite)
@@ -60,14 +66,14 @@ def drawSprite(x, y, sprite):
       filledRect(gfxSurface, dx, dy, scale, scale, col)
 
 def drawTool(x, y, num):
-  global gfxSurface1
+  global toolSurface
   text = files.getItemTexture(num)
   for a in range(5):
     for b in range(5):
       col = text[a][b].strip(')(').split(', ')
       for i in range(3):
         col[i] = int(col[i])
-      filledRect(gfxSurface1, x + 4*b, y + 4*a, 4, 4, col)
+      filledRect(toolSurface, x + 4*b, y + 4*a, 4, 4, col)
  
 
 def filledRect(surface, x, y, w, h, col):
@@ -128,16 +134,28 @@ def drawInventory():
   return 0
 
 def drawToolBar(slot):
-  global gfxSurface1
-  slot
-  gfxSurface1.fill((255, 255, 255))
+  global toolSurface
+  toolSurface.fill((255, 255, 255))
   for a in range(10):
     col = (0, 0, 0)
-    gfxdraw.rectangle(gfxSurface1, (22 * a, 0, 24, 24), col)
+    gfxdraw.rectangle(toolSurface, (22 * a, 0, 24, 24), col)
     drawTool(22*a + 1, 1, files.getInventoryItem(a))
-  gfxdraw.rectangle(gfxSurface1, (22 * slot, 0, 24, 24), (255, 0, 0))
+  gfxdraw.rectangle(toolSurface, (22 * slot, 0, 24, 24), (255, 0, 0))
     
 
 def drawHealthBar():
-  return 0
+  global hbSurface
+  health = logic.getHealth()
+  hbSurface.fill((255, 255, 255))
+  for a in range(10):
+    for b in range(2):
+      if ((10*b) + a <= health):
+        filledRectangle(hbSurface, 22*a + 1, 22*b + 1, 22, 22, (255, 0, 0))
 
+
+
+#do this when I want to respawn
+def respawn():
+  global scrn
+  scrn = [0, 0, 32, 24, 10]
+  drawFullScreen()
