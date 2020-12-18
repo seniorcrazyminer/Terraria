@@ -83,6 +83,16 @@ def drawTool(x, y, num):
       for i in range(3):
         col[i] = int(col[i])
       filledRect(toolSurface, x + 4*b, y + 4*a, 4, 4, col)
+
+def drawInvTool(x, y):
+  global invSurface
+  text = files.getItemTexture(5*x + y)
+  for a in range(5):
+    for b in range(5):
+      col = text[a][b].strip(')(').split(', ')
+      for i in range(3):
+        col[i] = int(col[i])
+      filledRect(invSurface, x + 4*b, y + 4*a, 4, 4, col)
  
 
 def filledRect(surface, x, y, w, h, col):
@@ -155,6 +165,7 @@ def drawInventory():
   for a in range(6):
     for b in range(5):
       gfxdraw.rectangle(invSurface, (22 * a, 22*b, 24, 24), (0, 0, 0))
+      drawInvTool(22*a + 1, 22*b + 1)
 
 def drawToolBar(slot):
   global toolSurface
