@@ -51,23 +51,26 @@ while True:
     keys = pygame.key.get_pressed()  #checking pressed keys
     mouse = pygame.mouse.get_pressed()
 
+    dx = 0
+    dy = 0
+
     if mouse[0]:
       pos = pygame.mouse.get_pos()
       logic.mouseClick(pos[0], pos[1])
     
     if keys[pygame.K_RIGHT]:
-      logic.movePlayer(1, 0)
+      dx = dx + 1
     
     if keys[pygame.K_LEFT]:
-      logic.movePlayer(-1, 0)
+      dx = dx - 1
       #plyr.move(-1, 0)
     
     if keys[pygame.K_DOWN]:
-      logic.movePlayer(0, 1)
+      dy = dy + 1
       #plyr.move(0, 1)
     
     if keys[pygame.K_UP]:
-      logic.movePlayer(0, -2)
+      dy = dy - 1
       #plyr.move(0, -1)
     
     if keys[pygame.K_q]:
@@ -93,7 +96,8 @@ while True:
         
 
     # Update.
-    logic.applyGravity()
+    dy = dy + logic.applyGravity()
+    logic.movePlayer(dx, dy)
     # Draw.
     screen.blit(buffer, (0, 0))
     screen.blit(buffer1, (0, 0))

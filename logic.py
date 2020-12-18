@@ -4,9 +4,11 @@ import random
 
 import math
 
-player = [0, 0, 0, 20]
+player = [0, 0, 20]
 wrld = [0, 0, 0, 0]
 scrn = [0, 0, 0, 0, 0]
+fallPath = [0, 0]
+fallPathActive = False
 
 currentSlot = 0
 
@@ -77,16 +79,6 @@ def movePlayer(dx, dy):
   [xmin, ymin, xmax, ymax, p] = scrn
   [minx, miny, maxx, maxy] = wrld
   gui.drawBlockBehind(x - scrn[0], y - scrn[1], x, y)
-  if (dx < 0):
-    if (x > xmin and not checkBlock(x, y, dx, 0)):
-      if (x < maxx - p and x > minx + p and xmin > minx):
-        sx = dx
-      x = x + dx
-  if (dx > 0):
-    if (x < xmax and not checkBlock(x, y, dx, 0)):
-      if (x < maxx - p and x > minx + p and xmax < maxx):
-        sx = dx
-      x = x + dx
   if (dy < 0):
     if (y > ymin and not checkBlock(x, y, 0, dy) and checkBlock(x, y, 0, 1)):
       if (y < maxy - p and y > miny + p and ymin > miny):
@@ -97,10 +89,19 @@ def movePlayer(dx, dy):
       if (y < maxy - p and y > miny + p and ymax < maxy):
         sy = dy
       y = y + dy
+  if (dx < 0):
+    if (x > xmin and not checkBlock(x, y, dx, 0)):
+      if (x < maxx - p and x > minx + p and xmin > minx):
+        sx = dx
+      x = x + dx
+  if (dx > 0):
+    if (x < xmax and not checkBlock(x, y, dx, 0)):
+      if (x < maxx - p and x > minx + p and xmax < maxx):
+        sx = dx
+      x = x + dx
+  
   if (sx != 0 or sy != 0):
     gui.shift(sx, sy)
-    player[2] = player[2] + sx
-    player[3] = player[3] + sy
   updateVars()
   player[0] = x
   player[1] = y
@@ -117,25 +118,35 @@ def setPlayerPos(x, y):
 
 def changeHealth(dh):
   global player
-  player[3] = player[3] + dh
+  player[2] = player[2] + dh
   gui.drawHealthBar()
 
 def getHealth():
   global player
-  return player[3]
+  return player[2]
 
 def applyGravity():
   global player
+  global fallPath
+  global fallPathActive
   x = player[0]
   y = player[1]
+  dy = 0
   onG = onGround(x, y)
   if (not onG):
-    movePlayer(0, 1)
-    player[2] = player[2] + 1
+    if (not fallPathActive):
+      fallPath = [player[0], player[1]]
+      fallPathActive = True
+    if (fallPathActive):
+      dy = 1
+      print(abs(player[1] - fallPath[1]))
   else:
-    if (player[2] > 8):
-      changeHealth(-(player[2] - 8))
-    player[2] = 0
+    if (fallPathActive):
+      fallPathActive = False
+      if (player[1] - fallPath[1] > 8):
+        changeHealth(-(abs(player[1] - fallPath[1]) - 8))
+      fallPath = [0, 0]
+  return dy
 
 def onGround(x, y):
   updateVars()
@@ -265,6 +276,6 @@ def attemptMoveRight(a, b):
 #do this when I want to respawn
 def respawn():
   global player
-  player = [0, 0, 0, 0, 0, 20]
+  player = [0, 0, 20]
   gui.respawn()
   
