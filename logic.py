@@ -275,10 +275,16 @@ def attemptMoveRight(a, b):
             gui.drawBlock(a - scrn[0]+1, b - scrn[1], a+1, b)
 
 
+# things to do constantly
+def tick():
+  if (player[2] <= 0):
+    respawn()
 
 #do this when I want to respawn
 def respawn():
   global player
   player = [0, 0, 20]
   gui.respawn()
-  
+
+while (True):
+  tick()

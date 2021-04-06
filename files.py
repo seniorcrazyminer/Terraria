@@ -35,18 +35,20 @@ def setDim(x, y):
   if (len(tempWorld) != dim[0]*dim[1]):
     tempWorld = [0] * (dim[0]*dim[1])
 
+def getLine(fileName, lineNumber):
+  with open(fileName, "r") as fs:
+    ln = 1
+    for line in fs:
+      if (ln == lineNumber):
+        return line
+      ln = ln + 1
+
+
 def loadTextures(fileName, fileName1):
   global textures
   global iTextures
   textures = []
   lines = []
-  with open(fileName, "r") as filestream:
-    for line in filestream:
-        cl = line.split(".")
-        lines.append(cl)
-  for l in lines:
-    textures.append([[l[0], l[1], l[2], l[3]], [l[4], l[5], l[6], l[7]], [l[8], l[9], l[10], l[11]], [l[12], l[13], l[14], l[15]]])
-  filestream.close()
   iTextures = []
   lines = []
   with open(fileName1, "r") as filestream:
@@ -59,11 +61,9 @@ def loadTextures(fileName, fileName1):
 
 def getTexture(num):
   global textures
-  if (num < len(textures)):
-    text = textures[num]
-    return text
-  else:
-    return textures[0]
+  tex = getLine("Textures/" + str(num), 3)
+  l = tex.split(".")
+  return [[l[0], l[1], l[2], l[3]], [l[4], l[5], l[6], l[7]], [l[8], l[9], l[10], l[11]], [l[12], l[13], l[14], l[15]]]
   
 def getItemTexture(num):
   global iTextures
