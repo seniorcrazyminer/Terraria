@@ -1,6 +1,7 @@
 import files
 import gui
 import logic
+import time
 
 import math as math
 
@@ -28,6 +29,7 @@ fpsClock = pygame.time.Clock()
 
 width, height = 640, 480
 screen = pygame.display.set_mode((width, height))
+logic.setScreen(screen)
 buffer = pygame.Surface((width, height))
 buffer1 = pygame.Surface((222, 24))
 buffer2 = pygame.Surface((222, 48))
@@ -47,12 +49,20 @@ gui.setInvSurface(buffer3)
 
 
 files.openInventory("inventory.txt", "quantity.txt")
-logic.generateWorld(500, 500, "world.txt")
-files.prepareWorld("world.txt")
+# logic.generateWorld(500, 500, "world.txt", "world.var.txt")
+files.prepareWorld("world.txt", "world.var.txt")
 
 
 # Game loop.
 while True:
+    code = logic.tick()
+    if (code == "dead"):
+      font = pygame.font.SysFont(None, 48)
+      img = font.render("You Died", True, (255, 0, 0))
+      screen.blit(img, (200, 190))
+      pygame.display.flip()
+      time.sleep(3)
+      logic.nextTick(code)
 
 
     keys = pygame.key.get_pressed()  #checking pressed keys
@@ -85,7 +95,7 @@ while True:
       #plyr.move(0, -1)
     
     if keys[pygame.K_q]:
-      files.saveWorld("world.txt")
+      files.saveWorld("world.txt", "world.var.txt")
         
     if keys[pygame.K_r]:
       logic.respawn()
@@ -101,6 +111,39 @@ while True:
     
     if keys[pygame.K_t]:
       inventoryOpen = False
+    
+    if keys[pygame.K_z]:
+      gui.drawFullScreen()
+
+    if keys[pygame.K_1]:
+      logic.setActiveSlot(0)
+
+    if keys[pygame.K_2]:
+      logic.setActiveSlot(1)
+
+    if keys[pygame.K_3]:
+      logic.setActiveSlot(2)
+    
+    if keys[pygame.K_4]:
+      logic.setActiveSlot(3)
+    
+    if keys[pygame.K_5]:
+      logic.setActiveSlot(4)
+    
+    if keys[pygame.K_6]:
+      logic.setActiveSlot(5)
+
+    if keys[pygame.K_7]:
+      logic.setActiveSlot(6)
+    
+    if keys[pygame.K_8]:
+      logic.setActiveSlot(7)
+    
+    if keys[pygame.K_9]:
+      logic.setActiveSlot(8)
+    
+    if keys[pygame.K_0]:
+      logic.setActiveSlot(9)
         
     #if keys[pygame.K_q]:
         

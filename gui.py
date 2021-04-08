@@ -1,7 +1,9 @@
 import files
 import logic
-
+import pygame
+from pygame import *
 from pygame import gfxdraw
+from pygame import font
 
 gfxSurface = 0
 toolSurface = 0
@@ -11,6 +13,8 @@ scrn = [0, 0, 32, 24, 10]
 
 scale = 5
 
+bgcol = (120, 255, 241)
+
 playerSprite = [[[255, 255, 255], [255, 255, 255], [255, 255, 255], [255, 255, 255]], [[255, 255, 255], [255, 255, 255], [255, 255, 255], [255, 255, 255]], [[255, 255, 255], [255, 255, 255], [255, 255, 255], [255, 255, 255]], [[255, 255, 255], [255, 255, 255], [255, 255, 255], [255, 255, 255]]]
 
 noTexture = [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]]
@@ -18,6 +22,13 @@ noTexture = [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0]
 def screen():
   global scrn
   return scrn
+
+def setBgcol(col):
+  global bgcol
+  if (bgcol != col):
+    bgcol = col
+    drawFullScreen()
+  
 
 def setScreen(xmin, ymin, xmax, ymax, padding):
   global scrn
@@ -49,6 +60,7 @@ def drawBlockBehind(x, y, wx, wy):
 def drawBlock(x, y, wx, wy):
   global gfxSurface
   global scale
+  global bgcol
   blk = files.getBlock(wx, wy)
   text = files.getTexture(blk) 
   for a in range(4):
@@ -59,11 +71,15 @@ def drawBlock(x, y, wx, wy):
       dx = (4*scale*x) + scale*b
       dy = (4*scale*y) + scale*a
       #gfxdraw.rectangle(gfxSurface, (dx, dy, scale, scale), col)
-      filledRect(gfxSurface, dx, dy, scale, scale, col)
+      if (col[0] != -1):
+        filledRect(gfxSurface, dx, dy, scale, scale, col)
+      else:
+        filledRect(gfxSurface, dx, dy, scale, scale, bgcol)
 
 def drawSprite(x, y, sprite):
   global gfxSurface
   global scale
+  global bgcol
   for a in range(4):
     for b in range(4):
       col = sprite[a][b]
@@ -72,7 +88,10 @@ def drawSprite(x, y, sprite):
       dx = (4*scale*x) + scale*b
       dy = (4*scale*y) + scale*a
       #gfxdraw.rectangle(gfxSurface, (dx, dy, scale, scale), col)
-      filledRect(gfxSurface, dx, dy, scale, scale, col)
+      if (col[0] != -1):
+        filledRect(gfxSurface, dx, dy, scale, scale, col)
+      else:
+        filledRect(gfxSurface, dx, dy, scale, scale, bgcol)
 
 def drawTool(x, y, num):
   global toolSurface
@@ -82,17 +101,19 @@ def drawTool(x, y, num):
       col = text[a][b].strip(')(').split(', ')
       for i in range(3):
         col[i] = int(col[i])
-      filledRect(toolSurface, x + 4*b, y + 4*a, 4, 4, col)
+      if (col[0] != -1):
+        filledRect(toolSurface, x + 4*b, y + 4*a, 4, 4, col)
 
-def drawInvTool(x, y):
+def drawInvTool(dx, dy, x, y):
   global invSurface
-  text = files.getItemTexture(5*x + y)
+  text = files.getItemTexture(files.getInventoryItem(5*x + y))
   for a in range(5):
     for b in range(5):
       col = text[a][b].strip(')(').split(', ')
       for i in range(3):
         col[i] = int(col[i])
-      filledRect(invSurface, x + 4*b, y + 4*a, 4, 4, col)
+      if (col[0] != -1):
+        filledRect(invSurface, dx + 4*b, dy + 4*a, 4, 4, col)
  
 
 def filledRect(surface, x, y, w, h, col):
@@ -123,7 +144,6 @@ def shift(dx, dy):
     renderYLine(0, scrn[1])
   if (dy == 1):
     renderYLine(scrn[3]-scrn[1] - 1, scrn[3])
-  
 
 def renderXLine(x, wx):
   global scrn
@@ -165,7 +185,14 @@ def drawInventory():
   for a in range(6):
     for b in range(5):
       gfxdraw.rectangle(invSurface, (22 * a, 22*b, 24, 24), (0, 0, 0))
-      drawInvTool(22*a + 1, 22*b + 1)
+      drawInvTool(22*a + 1, 22*b + 1, a, b)
+
+def displaySlot(x, y):
+  idx = 5*x + y
+  font = pygame.font.SysFont(None, 48)
+  img = font.render(str(files.getInventoryItem(idx)) + ", " + str(files.getInventoryQuantity(idx)), True, (255, 0, 0))
+  filledRect(invSurface, 200, 0, 640, 280, (255, 255, 255))
+  invSurface.blit(img, (200, 0))
 
 def drawToolBar(slot):
   global toolSurface
@@ -184,9 +211,7 @@ def drawHealthBar():
   for a in range(10):
     for b in range(2):
       if ((10*b) + a <= health):
-        filledRect(hbSurface, 22*a + 1, 22*b + 1, 20, 20, (255, 0, 0))
-
-
+        filledRect(hbSurface, 22*a + 1, 22*b + 1, 20, 20, (255, 0, 0))  
 
 #do this when I want to respawn
 def respawn():

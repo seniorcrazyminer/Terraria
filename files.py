@@ -3,9 +3,9 @@ import gui
 
 dim = [0, 0]
 spawn = [0, 0]
-textures = []
 iTextures = []
 tempWorld = []
+tempWorldVar = []
 
 inv = []
 qty = []
@@ -30,18 +30,23 @@ def setSpawn(x, y):
 
 def setDim(x, y):
   global dim
-  global tempWorld
+  global tempWorld, tempWorldVar
   dim = [x, y]
   if (len(tempWorld) != dim[0]*dim[1]):
     tempWorld = [0] * (dim[0]*dim[1])
+  if (len(tempWorldVar) != dim[0]*dim[1]):
+    tempWorldVar = [0] * (dim[0]*dim[1])
 
 def getLine(fileName, lineNumber):
+  l = ""
   with open(fileName, "r") as fs:
     ln = 1
     for line in fs:
       if (ln == lineNumber):
-        return line
+        l = line
       ln = ln + 1
+    fs.close()
+  return l
 
 
 def loadTextures(fileName, fileName1):
@@ -61,7 +66,7 @@ def loadTextures(fileName, fileName1):
 
 def getTexture(num):
   global textures
-  tex = getLine("Textures/" + str(num), 3)
+  tex = getLine("Textures/" + str(num[0]), 4 + num[1])
   l = tex.split(".")
   return [[l[0], l[1], l[2], l[3]], [l[4], l[5], l[6], l[7]], [l[8], l[9], l[10], l[11]], [l[12], l[13], l[14], l[15]]]
   
@@ -86,10 +91,10 @@ def openInventory(fileName, fileNameq):
   qty = split(lines)
   q.close()
 
-def openWorld(fileName):
+def openWorld(fileName, fileNameVar):
   global dim
   global spawn
-  global tempWorld
+  global tempWorld, tempWorldVar
   wd = open(fileName, "r")
   lines = wd.read()
   data = lines.split(",")
@@ -100,13 +105,22 @@ def openWorld(fileName):
   else:
     tempWorld = [0] * (dim[0]*dim[1])
   wd.close()
+  wdv = open(fileNameVar, "r")
+  lines = wdv.read()
+  data = lines.split(",")
+  if (len(split(data[4])) == dim[0]*dim[1]):
+    tempWorldVar = split(data[4])
+  else:
+    tempWorldVar = [0] * (dim[0]*dim[1])
+  wdv.close()
 
-def saveWorld(fileName):
-  global tempWorld
+def saveWorld(fileName, fileNameVar):
+  global tempWorld, tempWorldVar
   global dim
   global spawn
   print("saving...")
   with open(fileName, "w") as wd:
+    wdv = open(fileNameVar, "w")
     wd.seek(0, 0)
     wd.write(str(dim[0]))
     wd.write(",")
@@ -116,56 +130,63 @@ def saveWorld(fileName):
     wd.write(",")
     wd.write(str(spawn[1]))
     wd.write(",")
+    wdv.seek(0, 0)
+    wdv.write(str(dim[0]))
+    wdv.write(",")
+    wdv.write(str(dim[1]))
+    wdv.write(",")
+    wdv.write(str(spawn[0]))
+    wdv.write(",")
+    wdv.write(str(spawn[1]))
+    wdv.write(",")
     for block in tempWorld:
         wd.write(block)
+    for block in tempWorldVar:
+      wdv.write(block)
   wd.close()
+  wdv.close()
 
 def getBlock(x, y):
   global tempWorld
   global dim
   #wd = open("world.txt", "r")
   #wd.seek(y + (dim[1] * x), 0)
-  if (y < dim[1]):  
-    return int(tempWorld[y + (dim[1] * x)])
+  if (x >= 0 and x <= dim[0] - 1 and y >= 0 and y <= dim[1]-1):  
+    #print((int(tempWorld[y + (dim[1] * x)]), int(tempWorldVar[y + (dim[1] * x)])))
+    return (int(tempWorld[y + (dim[1] * x)]), int(tempWorldVar[y + (dim[1] * x)]))
   else:
-    return 0
+    return (-1, -1)
 
 def getBlockType(block):
-  if (block == 0):
-    return 0
-  if (block == 1):
-    return 2
-  if (block == 2):
-    return 2
-  if (block == 3):
-    return 2
-  if (block == 4):
-    return 1
-  if (block == 5):
-    return 1
-  if (block == 6):
-    return 1
-  if (block == 7):
-    return 1
+  return int(getLine("Textures/" + str(block[0]), 2))
+
+def getDrop(block):
+  string =  getLine("Textures/" + str(block[0]), 3).strip(')(\n').split(', ')
+  return string
 
 
-def setBlock(x, y, num):
-  global tempWorld
+def setBlock(x, y, blk):
+  global tempWorld, tempWorldVar
   global dim
-  tempWorld[y + (dim[1] * x)] = str(num)
+  tempWorld[y + (dim[1] * x)] = str(blk[0])
+  tempWorldVar[y + (dim[1] * x)] = str(blk[1])
 
 def getInventoryItem(numSlot):
   global inv
   return int(inv[numSlot])
 
+def getInventoryQuantity(numSlot):
+  global qty
+  return int(qty[numSlot])
+
 def setInventoryItem(numSlot, itm, q):
-  global inv
+  global inv, qty
   inv[numSlot] = itm
   qty[numSlot] = q
 
-def prepareWorld(fileName):
+def prepareWorld(fileName, fileNameVar):
   global spawn
-  openWorld(fileName) 
+  openWorld(fileName, fileNameVar) 
   print(spawn)
   logic.setPlayerPos(spawn[0], spawn[1])
   gui.setScreen(spawn[0] - 10, spawn[1] - 10, spawn[0] + 22, spawn[1] + 14, 10)
