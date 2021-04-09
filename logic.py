@@ -19,7 +19,7 @@ pbuf = pygame.Surface((640, 480))
 desert = [50, 100]
 corruption = [100, 200]
 
-
+fileName = ""
 
 player = [0, 0, 20]
 wrld = [0, 0, 0, 0]
@@ -46,40 +46,53 @@ def setScreen(scrn):
   global screen
   screen = scrn
 
+def updateSettings():
+  global scale
+  scale = files.getSetting(1)
+
 def filledRect(surface, x, y, w, h, col):
   gfxdraw.filled_polygon(surface, ((x, y), (x+w, y), (x+w, y+h), (x, y+h)), col)
 
-def progress(percent):
-  gfxdraw.line(pbuf, 0, 0, 640, 0, (0, 0, 0))
-  gfxdraw.line(pbuf, 0, 0, math.floor(percent*640), 0, (0, 0, 255))
-  screen.blit(pbuf, (0, 30))
+def progress(percent, line):
+  gfxdraw.line(pbuf, 0, 0 * line, 640, 0, (0, 0, 0))
+  gfxdraw.line(pbuf, 0, 0 * line, math.floor(percent*640), 0, (0, 0, 255))
+  screen.blit(pbuf, (0, 50 * line + 30))
   pygame.display.flip()
 
-def title(title):
-  filledRect(screen, 0, 0, 640, 20, (0, 0, 0))
+def title(title, line):
+  filledRect(screen, 0, 50*line, 640, 20, (0, 0, 0))
   font = pygame.font.SysFont(None, 24)
   img = font.render(title, True, (255, 255, 255))
-  screen.blit(img, (0, 0))
+  screen.blit(img, (0, 50*line))
   pygame.display.flip()
 
-def generateWorld(w, h, fileName, fileNameVar):
-  global width, height, desert, corruption
-  width = w
-  height = h
-  files.setDim(w, h)
+def randomString(length):
+  lets = "abcdefghijklmnopqrstuvwxyz"
+  string = ""
+  for i in range(length):
+    string = string + lets[random.randint(0, 25)]
+  return string
+
+def generateWorld():
+  global width, height, desert, corruption, fileName
+  width = files.getSetting(5)
+  height = files.getSetting(6)
+  fileName = randomString(8) + ".txt"
+  files.setDim(width, height)
   gnd = 50
   desert = [50, 100]
   corruption = [100, 200]
   dGnd = 0
   pgnd = [gnd] * width
-  title("generating")
-  for a in range(w):
-    progress(a/w)
+  title("Generating", 0)
+  title("Terraforming", 1)
+  for a in range(width):
+    progress(a/width, 1)
     if (a > desert[0] and a < desert[1]):
       for b in range(0, gnd):
         blk = 0
         files.setBlock(a, b, (blk, 0))
-      for b in range(gnd, h):
+      for b in range(gnd, height):
         blk = 3
         files.setBlock(a, b, (blk, 0))
     elif (a > corruption[0] and a < corruption[1]):
@@ -87,7 +100,7 @@ def generateWorld(w, h, fileName, fileNameVar):
         blk = 0
         files.setBlock(a, b, (blk, 0))
       files.setBlock(a, gnd, (5, 0))
-      for b in range(gnd+1, h):
+      for b in range(gnd+1, height):
         blk = 2
         files.setBlock(a, b, (blk, 0))
     else:
@@ -97,7 +110,7 @@ def generateWorld(w, h, fileName, fileNameVar):
           #blk = random.randint(4, 7)
         files.setBlock(a, b, (blk, 0))
       files.setBlock(a, gnd, (1, 0))
-      for b in range(gnd + 1, h):
+      for b in range(gnd + 1, height):
         blk = 2
         files.setBlock(a, b, (blk, 0))
     dGnd = dGnd + random.randint(-1, 1)
@@ -107,10 +120,12 @@ def generateWorld(w, h, fileName, fileNameVar):
       dGnd = 1
     pgnd[a] = gnd
     gnd = gnd + dGnd
-  spwnx = random.randint(10, 50)
+  spwnx = random.randint(files.getSetting(4) + 1, files.getSetting(4) + 51)
   spwny = 0
   while (files.getBlockType(files.getBlock(spwnx, spwny)) != 2):
     spwny = spwny + 1
+  progress(.3, 0)
+  title("Generating Landmarks", 1)
   
   for i in range(random.randint(5, 15)):
     chasmRadius = random.randint(3, 5)
@@ -127,19 +142,24 @@ def generateWorld(w, h, fileName, fileNameVar):
             curRadius = chasmRadius - 2
       if (curRadius > chasmRadius + 2):
             curRadius = chasmRadius + 2
-          
+  progress(.6, 0)
   replace()
+  progress(1, 0)
   files.setSpawn(spwnx, spwny)
-  files.saveWorld(fileName, fileNameVar)
+  files.saveWorld(fileName)
+  files.prepareWorld(fileName)
 
 # 1 4 7
 # 2 5 8
 # 3 6 9
 def replace():
-  title("Smoothing World 1 / 2")
+  title("Smoothing", 1)
+  title("Smoothing World 1 / 2", 2)
   replaceRule([[-1, 2, -1], [-1, (-1, 0), -1], [-1, 0, -1]], [[-1, -1, -1], [-1, (-1, 1), (-1, 0)], [-1, -1, -1]])
-  title("Smoothing World 2 / 2")
+  progress(.5, 1)
+  title("Smoothing World 2 / 2", 2)
   replaceRule([[-1, 0, -1], [-1, (-1, 0), -1], [-1, 2, -1]], [[-1, -1, -1], [-1, (-1, 2), (-1, 0)], [-1, -1, -1]])
+  progress(1, 1)
   # title("Smoothing Grass 2 / 4")
   # replaceRule([[-1, (0, 0), -1], [-1, (1, 0), -1], [-1, (-1, 0), -1]], [[-1, -1, -1], [-1, (1, 2), (2, 0)], [-1, -1, -1]])
   # # title("Smoothing Grass 3 / 4")
@@ -161,39 +181,41 @@ def replaceRule(rule, replace):
   print(rule)
   print(replace)
   for x in range(width):
-    progress((x / width))
+    progress((x / width), 2)
     for y in range(height):
-      tot = 0
-      target = 0
-      for a in range(-1, 2):
-        for b in range(-1, 2):
-          target = target + 1
-          if (x + a >= 0 and x + a <= width-1 and y + b >= 0 and y + b <= height-1):
-            if (type(rule[a+1][b+1]) is int):
-              if (rule[a+1][b+1] == -1):
-                tot = tot + 1
-              elif (rule[a+1][b+1] != -1 and getBlockType(x+a, y+b) == rule[a+1][b+1]):
-                tot = tot + 1
-            else:
-              if (rule[a+1][b+1][0] == -1 and rule[a+1][b+1][1] == getBlock(x + a, y + b)[1]):
-                tot = tot + 1
-              elif (files.getBlock(x + a, y + b) == rule[a + 1][b + 1]):
-                tot = tot + 1
-          else:
+      attemptReplace(x, y, rule, replace)
+
+def attemptReplace(x, y, rule, replace):
+  global width, height
+  tot = 0
+  target = 0
+  for a in range(-1, 2):
+    for b in range(-1, 2):
+      target = target + 1
+      if (x + a >= 0 and x + a <= width-1 and y + b >= 0 and y + b <= height-1):
+        if (type(rule[a+1][b+1]) is int):
+          if (rule[a+1][b+1] == -1):
             tot = tot + 1
-          if (tot != target):
-            break
-            break
-      if (tot == 9):
-        for a in range(-1, 1):
-          for b in range(-1, 1):
-            if (x + a >= 0 and x + a <= width-1 and y + b >= 0 and y + b <= height-1):
-              if (replace[a + 1][b + 1] != -1):
-                if (replace[a+1][b+1][0] == -1):
-                  files.setBlock(x+a, y+b, (files.getBlock(x+a, y+b)[0], replace[a+1][b+1][1]))
-                else:
-                  files.setBlock(x+a, y+b, replace[a+1][b+1])
-          
+          elif (getBlockType(x+a, y+b) == rule[a+1][b+1]):
+            tot = tot + 1
+        else:
+          if (rule[a+1][b+1][0] == -1 and rule[a+1][b+1][1] == getBlock(x + a, y + b)[1]):
+            tot = tot + 1
+          elif (files.getBlock(x + a, y + b) == rule[a + 1][b + 1]):
+            tot = tot + 1
+      else:
+        tot = tot + 1
+      if (tot != target):
+        return
+  if (tot == 9):
+    for a in range(-1, 1):
+      for b in range(-1, 1):
+        if (x + a >= 0 and x + a <= width-1 and y + b >= 0 and y + b <= height-1):
+          if (replace[a + 1][b + 1] != -1):
+            if (replace[a+1][b+1][0] == -1):
+              files.setBlock(x+a, y+b, (files.getBlock(x+a, y+b)[0], replace[a+1][b+1][1]))
+            else:
+              files.setBlock(x+a, y+b, replace[a+1][b+1])
 
 def addToInventory(item):
   for a in range(25):

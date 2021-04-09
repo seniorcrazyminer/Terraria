@@ -48,6 +48,11 @@ def getLine(fileName, lineNumber):
     fs.close()
   return l
 
+def getSetting(num):
+  line = getLine("settings.config", num)
+  setting = int(line.split(": ")[1])
+  return setting
+
 
 def loadTextures(fileName, fileName1):
   global textures
@@ -91,7 +96,7 @@ def openInventory(fileName, fileNameq):
   qty = split(lines)
   q.close()
 
-def openWorld(fileName, fileNameVar):
+def openWorld(fileName):
   global dim
   global spawn
   global tempWorld, tempWorldVar
@@ -104,23 +109,18 @@ def openWorld(fileName, fileNameVar):
     tempWorld = split(data[4])
   else:
     tempWorld = [0] * (dim[0]*dim[1])
-  wd.close()
-  wdv = open(fileNameVar, "r")
-  lines = wdv.read()
-  data = lines.split(",")
-  if (len(split(data[4])) == dim[0]*dim[1]):
-    tempWorldVar = split(data[4])
+  if (len(split(data[5])) == dim[0]*dim[1]):
+    tempWorldVar = split(data[5])
   else:
     tempWorldVar = [0] * (dim[0]*dim[1])
-  wdv.close()
+  wd.close()
 
-def saveWorld(fileName, fileNameVar):
+def saveWorld(fileName):
   global tempWorld, tempWorldVar
   global dim
   global spawn
   print("saving...")
   with open(fileName, "w") as wd:
-    wdv = open(fileNameVar, "w")
     wd.seek(0, 0)
     wd.write(str(dim[0]))
     wd.write(",")
@@ -130,21 +130,12 @@ def saveWorld(fileName, fileNameVar):
     wd.write(",")
     wd.write(str(spawn[1]))
     wd.write(",")
-    wdv.seek(0, 0)
-    wdv.write(str(dim[0]))
-    wdv.write(",")
-    wdv.write(str(dim[1]))
-    wdv.write(",")
-    wdv.write(str(spawn[0]))
-    wdv.write(",")
-    wdv.write(str(spawn[1]))
-    wdv.write(",")
     for block in tempWorld:
         wd.write(block)
+    wd.write(",")
     for block in tempWorldVar:
-      wdv.write(block)
+      wd.write(block)
   wd.close()
-  wdv.close()
 
 def getBlock(x, y):
   global tempWorld
@@ -184,12 +175,17 @@ def setInventoryItem(numSlot, itm, q):
   inv[numSlot] = itm
   qty[numSlot] = q
 
-def prepareWorld(fileName, fileNameVar):
+def prepareWorld(fileName):
   global spawn
-  openWorld(fileName, fileNameVar) 
+  openWorld(fileName) 
   print(spawn)
   logic.setPlayerPos(spawn[0], spawn[1])
-  gui.setScreen(spawn[0] - 10, spawn[1] - 10, spawn[0] + 22, spawn[1] + 14, 10)
+  padding = getSetting(4)
+  sWidth = getSetting(2)
+  sHeight = getSetting(3)
+  msw = sWidth - padding
+  msh = sHeight - padding
+  gui.setScreen(spawn[0] - padding, spawn[1] - padding, spawn[0] + msw, spawn[1] + msh, 10)
   gui.drawFullScreen()
   gui.drawToolBar(0)
   gui.drawHealthBar()
@@ -198,7 +194,12 @@ def rePrepareWorld():
   global spawn
   print(spawn)
   logic.setPlayerPos(spawn[0], spawn[1])
-  gui.setScreen(spawn[0] - 10, spawn[1] - 10, spawn[0] + 22, spawn[1] + 14, 10)
+  padding = getSetting(4)
+  sWidth = getSetting(2)
+  sHeight = getSetting(3)
+  msw = sWidth - padding
+  msh = sHeight - padding
+  gui.setScreen(spawn[0] - padding, spawn[1] - padding, spawn[0] + msw, spawn[1] + msh, 10)
   gui.drawFullScreen()
   gui.drawToolBar(0)
   gui.drawHealthBar()

@@ -49,8 +49,10 @@ gui.setInvSurface(buffer3)
 
 
 files.openInventory("inventory.txt", "quantity.txt")
-# logic.generateWorld(500, 500, "world.txt", "world.var.txt")
-files.prepareWorld("world.txt", "world.var.txt")
+logic.generateWorld()
+
+gui.updateSettings()
+logic.updateSettings()
 
 
 # Game loop.

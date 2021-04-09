@@ -29,6 +29,9 @@ def setBgcol(col):
     bgcol = col
     drawFullScreen()
   
+def updateSettings():
+  global scale
+  scale = files.getSetting(1)
 
 def setScreen(xmin, ymin, xmax, ymax, padding):
   global scrn
