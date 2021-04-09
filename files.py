@@ -66,14 +66,14 @@ def loadTextures(fileName, fileName1):
         cl = line.split(".")
         lines.append(cl)
   for l in lines:
-    iTextures.append([[l[0], l[1], l[2], l[3], l[4]], [l[5], l[6], l[7], l[8], l[9]], [l[10], l[11], l[12], l[13], l[14]], [l[15], l[16], l[17], l[18], l[19]], [l[20], l[21], l[22], l[23], l[24]]])
+    iTextures.append([[l[i], l[i+1], l[i+2], l[i+3], l[i+4]] for i in range(0, 25, 5)])
   filestream.close()
 
 def getTexture(num):
   global textures
   tex = getLine("Textures/" + str(num[0]), 4 + num[1])
   l = tex.split(".")
-  return [[l[0], l[1], l[2], l[3]], [l[4], l[5], l[6], l[7]], [l[8], l[9], l[10], l[11]], [l[12], l[13], l[14], l[15]]]
+  return [[l[i], l[i+1], l[i+2], l[i+3]] for i in range(0, 16, 4)]
   
 def getItemTexture(num):
   global iTextures

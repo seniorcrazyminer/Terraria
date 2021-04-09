@@ -66,9 +66,11 @@ def title(title, line):
   screen.blit(img, (0, 50*line))
   pygame.display.flip()
 
-def randomString(length):
+def randomName(length):
   lets = "abcdefghijklmnopqrstuvwxyz"
+  clets = "bcdfghjklmn"
   string = ""
+  type = 'v'
   for i in range(length):
     string = string + lets[random.randint(0, 25)]
   return string
@@ -127,7 +129,7 @@ def generateWorld():
   progress(.3, 0)
   title("Generating Landmarks", 1)
   
-  for i in range(random.randint(5, 15)):
+  for i in range(random.randint(15, 35)):
     chasmRadius = random.randint(3, 5)
     a = random.randint(corruption[0] + chasmRadius + 2, corruption[1] - chasmRadius - 2)
     curRadius = chasmRadius
@@ -155,26 +157,11 @@ def generateWorld():
 def replace():
   title("Smoothing", 1)
   title("Smoothing World 1 / 2", 2)
-  replaceRule([[-1, 2, -1], [-1, (-1, 0), -1], [-1, 0, -1]], [[-1, -1, -1], [-1, (-1, 1), (-1, 0)], [-1, -1, -1]])
+  replaceRule([[-1, 2, -1], [0, (-1, 0), -1], [-1, 0, 2]], [[-1, -1, -1], [-1, (-1, 1), (-1, 0)], [-1, -1, -1]])
   progress(.5, 1)
   title("Smoothing World 2 / 2", 2)
-  replaceRule([[-1, 0, -1], [-1, (-1, 0), -1], [-1, 2, -1]], [[-1, -1, -1], [-1, (-1, 2), (-1, 0)], [-1, -1, -1]])
+  replaceRule([[-1, 0, 2], [0, (-1, 0), -1], [-1, 2, -1]], [[-1, -1, -1], [-1, (-1, 2), (-1, 0)], [-1, -1, -1]])
   progress(1, 1)
-  # title("Smoothing Grass 2 / 4")
-  # replaceRule([[-1, (0, 0), -1], [-1, (1, 0), -1], [-1, (-1, 0), -1]], [[-1, -1, -1], [-1, (1, 2), (2, 0)], [-1, -1, -1]])
-  # # title("Smoothing Grass 3 / 4")
-  # # replaceRule([[-1, (0, 0), -1], [-1, (1, 1), -1], [-1, -1, -1]], [[-1, -1, -1], [-1, (0, 0), (1, 0)], [-1, -1, -1]])
-  # # title("Smoothing Grass 4 / 4")
-  # # replaceRule([[-1, -1, -1], [-1, (1, 2), -1], [-1, (0, 0), -1]], [[-1, -1, -1], [-1, (0, 0), (1, 0)], [-1, -1, -1]])
-
-  # title("Smoothing Desert 1 / 4")
-  # replaceRule([[-1, (-1, 0), -1], [-1, (3, 0), -1], [-1, (0, 0), -1]], [[-1, -1, -1], [-1, (3, 1), (1, 0)], [-1, -1, -1]])
-  # title("Smoothing Desert 2 / 4")
-  # replaceRule([[-1, (0, 0), -1], [-1, (3, 0), -1], [-1, (-1, 0), -1]], [[-1, -1, -1], [-1, (3, 2), (1, 0)], [-1, -1, -1]])
-  # # title("Smoothing Desert 3 / 4")
-  # # replaceRule([[-1, (0, 0), -1], [-1, (3, 1), -1], [-1, -1, -1]], [[-1, -1, -1], [-1, (0, 0), (3, 0)], [-1, -1, -1]])
-  # # title("Smoothing Desert 4 / 4")
-  # # replaceRule([[-1, -1, -1], [-1, (3, 2), -1], [-1, (0, 0), -1]], [[-1, -1, -1], [-1, (0, 0), (3, 0)], [-1, -1, -1]])
 
 def replaceRule(rule, replace):
   global width, height
@@ -216,6 +203,15 @@ def attemptReplace(x, y, rule, replace):
               files.setBlock(x+a, y+b, (files.getBlock(x+a, y+b)[0], replace[a+1][b+1][1]))
             else:
               files.setBlock(x+a, y+b, replace[a+1][b+1])
+
+def getBiome(x, y):
+  global desert, corruption
+  if (x >= desert[0] and x <= desert[1]):
+    return "desert"
+  elif (x >= corruption[0] and x <= corruption[1]):
+    return "corruption"
+  else:
+    return "Forest"
 
 def addToInventory(item):
   for a in range(25):

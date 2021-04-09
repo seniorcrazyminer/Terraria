@@ -49,7 +49,8 @@ gui.setInvSurface(buffer3)
 
 
 files.openInventory("inventory.txt", "quantity.txt")
-logic.generateWorld()
+files.prepareWorld("zgwoqajp.txt")
+# logic.generateWorld()
 
 gui.updateSettings()
 logic.updateSettings()
