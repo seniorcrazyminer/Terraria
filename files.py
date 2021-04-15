@@ -1,5 +1,7 @@
 import logic
 import gui
+import os
+
 
 dim = [0, 0]
 spawn = [0, 0]
@@ -70,10 +72,7 @@ def loadTextures(fileName, fileName1):
   filestream.close()
 
 def getTexture(num):
-  global textures
-  tex = getLine("Textures/" + str(num[0]), 4 + num[1])
-  l = tex.split(".")
-  return [[l[i], l[i+1], l[i+2], l[i+3]] for i in range(0, 16, 4)]
+  return int(getLine("Textures/" + str(num), 1))
   
 def getItemTexture(num):
   global iTextures
@@ -96,10 +95,20 @@ def openInventory(fileName, fileNameq):
   qty = split(lines)
   q.close()
 
+def listAllWorlds():
+  directory = r'/home/runner/Terraria/Worlds/'
+  list = []
+  for filename in os.listdir(directory):
+      if filename.endswith(".wrld"):
+          list.append(filename[0:filename.find('.')])
+      else:
+          continue
+  return list
+
 def openWorld(fileName):
   global dim
   global spawn
-  global tempWorld, tempWorldVar
+  global tempWorld
   wd = open(fileName, "r")
   lines = wd.read()
   data = lines.split(",")
@@ -109,14 +118,10 @@ def openWorld(fileName):
     tempWorld = split(data[4])
   else:
     tempWorld = [0] * (dim[0]*dim[1])
-  if (len(split(data[5])) == dim[0]*dim[1]):
-    tempWorldVar = split(data[5])
-  else:
-    tempWorldVar = [0] * (dim[0]*dim[1])
   wd.close()
 
 def saveWorld(fileName):
-  global tempWorld, tempWorldVar
+  global tempWorld
   global dim
   global spawn
   print("saving...")
@@ -132,9 +137,6 @@ def saveWorld(fileName):
     wd.write(",")
     for block in tempWorld:
         wd.write(block)
-    wd.write(",")
-    for block in tempWorldVar:
-      wd.write(block)
   wd.close()
 
 def getBlock(x, y):
@@ -143,24 +145,22 @@ def getBlock(x, y):
   #wd = open("world.txt", "r")
   #wd.seek(y + (dim[1] * x), 0)
   if (x >= 0 and x <= dim[0] - 1 and y >= 0 and y <= dim[1]-1):  
-    #print((int(tempWorld[y + (dim[1] * x)]), int(tempWorldVar[y + (dim[1] * x)])))
-    return (int(tempWorld[y + (dim[1] * x)]), int(tempWorldVar[y + (dim[1] * x)]))
+    return int(tempWorld[y + (dim[1] * x)])
   else:
-    return (-1, -1)
+    return -1
 
 def getBlockType(block):
-  return int(getLine("Textures/" + str(block[0]), 2))
+  return int(getLine("Textures/" + str(block), 2))
 
 def getDrop(block):
-  string =  getLine("Textures/" + str(block[0]), 3).strip(')(\n').split(', ')
+  string =  getLine("Textures/" + str(block), 3).strip(')(\n').split(', ')
   return string
 
 
 def setBlock(x, y, blk):
-  global tempWorld, tempWorldVar
+  global tempWorld
   global dim
-  tempWorld[y + (dim[1] * x)] = str(blk[0])
-  tempWorldVar[y + (dim[1] * x)] = str(blk[1])
+  tempWorld[y + (dim[1] * x)] = str(blk)
 
 def getInventoryItem(numSlot):
   global inv

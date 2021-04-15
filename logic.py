@@ -16,6 +16,10 @@ from pygame import font
 
 pbuf = pygame.Surface((640, 480))
 
+fps = 60
+fpsClock = pygame.time.Clock()
+
+
 desert = [50, 100]
 corruption = [100, 200]
 
@@ -66,20 +70,67 @@ def title(title, line):
   screen.blit(img, (0, 50*line))
   pygame.display.flip()
 
-def randomName(length):
+def text(x, y, string, size, color):
+  font = pygame.font.SysFont(None, size)
+  img = font.render(string, True, color)
+  screen.blit(img, (x, y))
+  pygame.display.flip()
+
+def worldsMenu():
+  global fpsClock, fps
+  list = files.listAllWorlds()
+  list.append("nw")
+  print(list)
+  for i in range(len(list)):
+    filledRect(screen, 5, 30*i+5, 630, 24, (128, 128, 128))
+    text(10, 30*i+7, list[i], 24, (255, 255, 255))
+  while True:
+    mouse = pygame.mouse.get_pressed()
+    if mouse[0]:
+      pos = pygame.mouse.get_pos()
+      for i in range(len(list)):
+        if (pointInRect(pos, (5, 30*i+5, 630, 24))):
+          print(list[i])
+          if (list[i] == "nw"):
+            generateWorld()
+          else:
+            playWorld(list[i])
+          return
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+    pygame.display.flip()
+    fpsClock.tick(fps)
+
+def pointInRect(point,rect):
+    x1, y1, w, h = rect
+    x2, y2 = x1+w, y1+h
+    x, y = point
+    if (x1 < x and x < x2):
+        if (y1 < y and y < y2):
+            return True
+    return False
+
+def playWorld(name):
+  global fileName
+  fileName = "Worlds/" +name + ".wrld"
+  files.prepareWorld(fileName)
+
+
+def randomString(length):
   lets = "abcdefghijklmnopqrstuvwxyz"
-  clets = "bcdfghjklmn"
   string = ""
-  type = 'v'
   for i in range(length):
     string = string + lets[random.randint(0, 25)]
   return string
 
 def generateWorld():
   global width, height, desert, corruption, fileName
+  filledRect(screen, 0, 0, 640, 480, (0, 0, 0))
   width = files.getSetting(5)
   height = files.getSetting(6)
-  fileName = randomString(8) + ".txt"
+  fileName = "Worlds/" + randomString(8) + ".wrld"
   files.setDim(width, height)
   gnd = 50
   desert = [50, 100]
@@ -93,28 +144,28 @@ def generateWorld():
     if (a > desert[0] and a < desert[1]):
       for b in range(0, gnd):
         blk = 0
-        files.setBlock(a, b, (blk, 0))
+        files.setBlock(a, b, blk)
       for b in range(gnd, height):
         blk = 3
-        files.setBlock(a, b, (blk, 0))
+        files.setBlock(a, b, blk)
     elif (a > corruption[0] and a < corruption[1]):
       for b in range(0, gnd):
         blk = 0
-        files.setBlock(a, b, (blk, 0))
-      files.setBlock(a, gnd, (5, 0))
+        files.setBlock(a, b, blk)
+      files.setBlock(a, gnd, 5)
       for b in range(gnd+1, height):
         blk = 2
-        files.setBlock(a, b, (blk, 0))
+        files.setBlock(a, b, blk)
     else:
       for b in range(0, gnd):
         blk = 0
         #if (random.randint(0, 100) < 10):
           #blk = random.randint(4, 7)
-        files.setBlock(a, b, (blk, 0))
-      files.setBlock(a, gnd, (1, 0))
+        files.setBlock(a, b, blk)
+      files.setBlock(a, gnd, 1)
       for b in range(gnd + 1, height):
         blk = 2
-        files.setBlock(a, b, (blk, 0))
+        files.setBlock(a, b, blk)
     dGnd = dGnd + random.randint(-1, 1)
     if (dGnd < -1):
       dGnd = -1
@@ -136,16 +187,24 @@ def generateWorld():
     chasmDepth = random.randint(25, 50)
     for y in range(pgnd[a], chasmDepth):
       for x in range(a - curRadius, a + curRadius):
-        files.setBlock(x, y, (0, 0))
-      files.setBlock(a - curRadius, y, (4, 0))
-      files.setBlock(a + curRadius, y, (4, 0))
+        files.setBlock(x, y, 0)
+      files.setBlock(a - curRadius, y, 4)
+      files.setBlock(a + curRadius, y, 4)
       curRadius = curRadius + random.randint(-1, 1)
       if (curRadius < chasmRadius - 2):
             curRadius = chasmRadius - 2
       if (curRadius > chasmRadius + 2):
             curRadius = chasmRadius + 2
+  
+  for i in range(random.randint(100, 200)):
+    x = random.randint(5, width - 5)
+    y = random.randint(5, height-5)
+    w = random.randint(3, 5)
+    h = random.randint(3, 5)
+    for a in range(-w, w+1):
+      for b in range(-h, h+1):
+        files.setBlock(x+a, y+b, 6)
   progress(.6, 0)
-  replace()
   progress(1, 0)
   files.setSpawn(spwnx, spwny)
   files.saveWorld(fileName)
@@ -186,7 +245,7 @@ def attemptReplace(x, y, rule, replace):
           elif (getBlockType(x+a, y+b) == rule[a+1][b+1]):
             tot = tot + 1
         else:
-          if (rule[a+1][b+1][0] == -1 and rule[a+1][b+1][1] == getBlock(x + a, y + b)[1]):
+          if (rule[a+1][b+1][0] == -1 and rule[a+1][b+1][1] == getBlock(x + a, y + b)):
             tot = tot + 1
           elif (files.getBlock(x + a, y + b) == rule[a + 1][b + 1]):
             tot = tot + 1
@@ -200,7 +259,7 @@ def attemptReplace(x, y, rule, replace):
         if (x + a >= 0 and x + a <= width-1 and y + b >= 0 and y + b <= height-1):
           if (replace[a + 1][b + 1] != -1):
             if (replace[a+1][b+1][0] == -1):
-              files.setBlock(x+a, y+b, (files.getBlock(x+a, y+b)[0], replace[a+1][b+1][1]))
+              files.setBlock(x+a, y+b, (files.getBlock(x+a, y+b), replace[a+1][b+1][1]))
             else:
               files.setBlock(x+a, y+b, replace[a+1][b+1])
 
@@ -261,7 +320,7 @@ def movePlayer(dx, dy):
         sy = dy
       y = y + dy
   if (dx < 0):
-    if (getBlock(x+dx, y)[1] == 1):
+    if (getBlock(x+dx, y) == 1):
       if (y < maxy - p and y > miny + p and ymin > miny):
         sy = sy - 1
       y = y - 1
@@ -271,7 +330,7 @@ def movePlayer(dx, dy):
       x = x + dx
       
   if (dx > 0):
-    if (getBlock(x+dx, y)[1] == 2):
+    if (getBlock(x+dx, y) == 2):
       if (y < maxy - p and y > miny + p and ymin > miny):
         sy = sy - 1
       y = y - 1
@@ -358,9 +417,8 @@ def changeSlot(ds):
 
 def mouseClick(x, y):
   global scale
-  x = math.floor(x / (scale*4))
-  y = math.floor(y / (scale*4))
-  gui.fillRect(4*scale*x, 4*scale*y, 4*scale, 4*scale, (255, 0, 0))
+  x = math.floor(x / (16))
+  y = math.floor(y / (16))
   useTool(x, y)
 
 def mouseClickInventory(x, y):
@@ -374,14 +432,20 @@ def useTool(tx, ty):
   global scrn
   currentTool = files.getInventoryItem(currentSlot)
   if (currentTool == 4):
-    gui.fillRect(4*scale*tx, 4*scale*ty, 4*scale, 4*scale, (0, 255, 0))
     addToInventory(files.getDrop(getBlock(tx + scrn[0], ty + scrn[1])))
-    files.setBlock(tx + scrn[0], ty + scrn[1], (0, 0))
-    gui.drawBlock(tx, ty, tx + scrn[0], ty + scrn[1])
+    files.setBlock(tx + scrn[0], ty + scrn[1], 0)
+    updateBlock(tx, ty)
   elif (currentTool == 1):
-    gui.fillRect(4*scale*tx, 4*scale*ty, 4*scale, 4*scale, (0, 255, 0))
-    files.setBlock(tx + scrn[0], ty + scrn[1], (2, 0))
-    gui.drawBlock(tx, ty, tx + scrn[0], ty + scrn[1])
+    files.setBlock(tx + scrn[0], ty + scrn[1], 2)
+    updateBlock(tx, ty)
+  elif (currentTool == 2):
+    files.setBlock(tx + scrn[0], ty + scrn[1], 3)
+    updateBlock(tx, ty)
+
+def updateBlock(x, y):
+  for a in range(-1, 2):
+    for b in range(-1, 2):
+      gui.drawBlock(x + a, y + b, x + a + scrn[0], y + b + scrn[1])
 
 def setActiveSlot(n):
   global currentSlot
@@ -412,7 +476,7 @@ def settleWaterOnce():
           attemptMoveRight(a, b)
 
 def getWater(a, b):
-  blk = files.getBlock(a, b)[0]
+  blk = files.getBlock(a, b)
   t = files.getBlockType(blk)
   blk = getWaterNum(blk)
   return blk, t
@@ -420,8 +484,8 @@ def getWater(a, b):
 def attemptMoveDown(a, b):
   global scrn
   blk, t = getWater(a, b)
-  if (files.getBlockType(files.getBlock(a, b + 1)[0]) == 0) and t == 1:
-    l = getWaterNum(files.getBlock(a, b+1)[0])
+  if (files.getBlockType(files.getBlock(a, b + 1)) == 0) and t == 1:
+    l = getWaterNum(files.getBlock(a, b+1))
     if l == 8: l = 0
     if (l < 4):
       files.setBlock(a, b, (8, 0))
@@ -430,8 +494,8 @@ def attemptMoveDown(a, b):
           if (b > scrn[1] and b < scrn[3]):
             gui.drawBlock(a - scrn[0], b - scrn[1], a, b)
             gui.drawBlock(a - scrn[0], b - scrn[1] + 1, a, b + 1)
-  if (files.getBlockType(files.getBlock(a, b + 1)[0]) == 1) and t == 1:
-    l = getWaterNum(files.getBlock(a, b+1)[0])
+  if (files.getBlockType(files.getBlock(a, b + 1)) == 1) and t == 1:
+    l = getWaterNum(files.getBlock(a, b+1))
     if l == 8: l = 0
     if (l < 4):
       files.setBlock(a, b, (getNumWater(blk - 1), 0))
@@ -444,8 +508,8 @@ def attemptMoveDown(a, b):
 def attemptMoveLeft(a, b):
   global scrn
   blk, t = getWater(a, b)
-  if (files.getBlockType(files.getBlock(a-1, b)[0]) != 2) and t == 1:
-    l = getWaterNum(files.getBlock(a-1, b)[0])
+  if (files.getBlockType(files.getBlock(a-1, b)) != 2) and t == 1:
+    l = getWaterNum(files.getBlock(a-1, b))
     if l == 8: l = 0
     if (l < 4):
       files.setBlock(a, b, (getNumWater(blk - 1), 0))
@@ -458,8 +522,8 @@ def attemptMoveLeft(a, b):
 def attemptMoveRight(a, b):
   global scrn
   blk, t = getWater(a, b)
-  if (files.getBlockType(files.getBlock(a+1, b)[0]) != 2) and t == 1:
-    l = getWaterNum(files.getBlock(a+1, b)[0])
+  if (files.getBlockType(files.getBlock(a+1, b)) != 2) and t == 1:
+    l = getWaterNum(files.getBlock(a+1, b))
     if l == 8: l = 0
     if (l < 4):
       files.setBlock(a, b, (getNumWater(blk - 1), 0))
@@ -472,19 +536,26 @@ def attemptMoveRight(a, b):
 
 # things to do constantly
 def tick():
-  global desert, player, corruption
-  if (player[0] >= desert[0] and player[0] <= desert[1]):
-    gui.setBgcol((120, 165, 255))
-  elif (player[0] >= corruption[0] and player[0] <= corruption[1]):
-    gui.setBgcol((168, 138, 191))
-  else:
-    gui.setBgcol((120, 255, 241))
+  global player
   if (player[2] <= 0):
     return "dead"
+
+def checkBiome():
+  global desert, corruption, player
+  if (player[0] >= desert[0] and player[0] <= desert[1]):
+    return "desert"
+  elif (player[0] >= corruption[0] and player[0] <= corruption[1]):
+    return "corruption"
+  else:
+    return "forest"
 
 def nextTick(code):
   if (code == "dead"):
     respawn()
+
+def saveWorld():
+  global fileName
+  files.saveWorld(fileName)
 
 #do this when I want to respawn
 def respawn():

@@ -30,7 +30,9 @@ fpsClock = pygame.time.Clock()
 width, height = 640, 480
 screen = pygame.display.set_mode((width, height))
 logic.setScreen(screen)
-buffer = pygame.Surface((width, height))
+buffer = pygame.Surface([640,480], pygame.SRCALPHA, 32)
+buffer = buffer.convert_alpha()
+bgbuffer = pygame.Surface((width, height))
 buffer1 = pygame.Surface((222, 24))
 buffer2 = pygame.Surface((222, 48))
 buffer3 = pygame.Surface((width, height))
@@ -41,7 +43,7 @@ mainBuffer = pygame.Surface((width, height))
 
 files.loadTextures("textures.txt", "itextures.txt")
 
-gui.setGfxSurface(buffer)
+gui.setGfxSurface(buffer, bgbuffer)
 gui.setToolSurface(buffer1)
 gui.setHbSurface(buffer2)
 gui.setInvSurface(buffer3)
@@ -49,8 +51,9 @@ gui.setInvSurface(buffer3)
 
 
 files.openInventory("inventory.txt", "quantity.txt")
-files.prepareWorld("zgwoqajp.txt")
+# files.prepareWorld("shelvcem.txt")
 # logic.generateWorld()
+logic.worldsMenu()
 
 gui.updateSettings()
 logic.updateSettings()
@@ -98,7 +101,7 @@ while True:
       #plyr.move(0, -1)
     
     if keys[pygame.K_q]:
-      files.saveWorld("world.txt", "world.var.txt")
+      logic.saveWorld()
         
     if keys[pygame.K_r]:
       logic.respawn()
@@ -161,10 +164,13 @@ while True:
     dy = dy + logic.applyGravity()
     logic.movePlayer(dx, dy)
     # Draw.
+
+    gui.updateBackground()
     
     if (inventoryOpen):
       mainBuffer.blit(buffer3, (0, 0))
     else:
+      mainBuffer.blit(bgbuffer, (0, 0))
       mainBuffer.blit(buffer, (0, 0))
       mainBuffer.blit(buffer1, (0, 0))
       mainBuffer.blit(buffer2, (223, 0))
